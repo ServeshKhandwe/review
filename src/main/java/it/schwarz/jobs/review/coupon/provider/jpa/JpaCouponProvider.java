@@ -40,9 +40,10 @@ public class JpaCouponProvider implements CouponProvider {
 
     @Override
     public void registerCouponApplication(String couponCode) {
-        applicationRepository.save(new ApplicationJpaEntity(
-                couponCode,
-                Instant.now()));
+        // getReferenceById returns a proxy without a SELECT — correct here
+        // because we only need the FK reference, not the full entity data
+        CouponJpaEntity couponRef = couponJpaRepository.getReferenceById(couponCode);
+        applicationRepository.save(new ApplicationJpaEntity(couponRef, Instant.now()));
     }
 
     @Override
