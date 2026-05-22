@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "APPLICATION")
+@Table(name = "APPLICATION", indexes = @Index(name = "idx_application_coupon_code", columnList = "COUPON_CODE"))
 public class ApplicationJpaEntity {
 
     @Id
