@@ -2,8 +2,8 @@ package it.schwarz.jobs.review.coupon.api.dto;
 
 import it.schwarz.jobs.review.coupon.domain.entity.AmountOfMoney;
 import it.schwarz.jobs.review.coupon.domain.entity.Coupon;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -16,13 +16,13 @@ public record CreateCouponRequestDto(
         String code,
 
         @NotNull
-        @Min(0)
-        @Max(10000)
+        @DecimalMin(value = "0.01")
+        @DecimalMax(value = "10000.00")
         BigDecimal discount,
 
         @NotNull
-        @Min(0)
-        @Max(10000)
+        @DecimalMin(value = "0.00")
+        @DecimalMax(value = "10000.00")
         BigDecimal minBasketValue,
 
         @NotNull
