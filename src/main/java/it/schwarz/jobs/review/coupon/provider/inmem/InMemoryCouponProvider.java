@@ -7,6 +7,7 @@ import it.schwarz.jobs.review.coupon.domain.usecase.CouponProvider;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * InMemory Implementation to simplify local test and development.
@@ -14,8 +15,8 @@ import java.util.*;
  */
 public class InMemoryCouponProvider implements CouponProvider {
 
-    private final Set<Coupon> coupons = new HashSet<>();
-    private final Set<CouponApplications> couponApplications = new HashSet<>();
+    private final Set<Coupon> coupons = ConcurrentHashMap.newKeySet();
+    private final Map<String, List<Instant>> applicationsByCode = new ConcurrentHashMap<>();
 
     public InMemoryCouponProvider() {
         // Test Coupons
@@ -23,16 +24,13 @@ public class InMemoryCouponProvider implements CouponProvider {
         coupons.add(new Coupon("TEST_15_100", AmountOfMoney.of("15.00"), AmountOfMoney.of("100.00"), "15 for 100"));
         coupons.add(new Coupon("TEST_40_200", AmountOfMoney.of("40.00"), AmountOfMoney.of("200.00"), "40  for 200"));
 
-
         // Test DateTimes
         var applicationDateTimes = new ArrayList<Instant>();
         applicationDateTimes.add(Instant.now().plusSeconds(1));
         applicationDateTimes.add(Instant.now().plusSeconds(2));
         applicationDateTimes.add(Instant.now().plusSeconds(3));
         applicationDateTimes.add(Instant.now().plusSeconds(4));
-        couponApplications.add(
-                new CouponApplications("TEST_05_50", applicationDateTimes)
-        );
+        applicationsByCode.put("TEST_05_50", applicationDateTimes);
     }
 
 
@@ -62,13 +60,15 @@ public class InMemoryCouponProvider implements CouponProvider {
 
     @Override
     public void registerCouponApplication(String couponCode) {
-        // Intentionally left blank, because it is currently not used
+        applicationsByCode.computeIfAbsent(couponCode, k -> new ArrayList<>()).add(Instant.now());
     }
 
     @Override
     public Optional<CouponApplications> getCouponApplications(String couponCode) {
-        return couponApplications.stream()
-                .filter(it -> it.getCouponCode().equals(couponCode))
-                .findFirst();
+        if (findById(couponCode).isEmpty()) {
+            return Optional.empty();
+        }
+        List<Instant> timestamps = applicationsByCode.getOrDefault(couponCode, List.of());
+        return Optional.of(new CouponApplications(couponCode, new ArrayList<>(timestamps)));
     }
 }
