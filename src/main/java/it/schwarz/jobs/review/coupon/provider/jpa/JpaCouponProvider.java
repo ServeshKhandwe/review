@@ -32,6 +32,7 @@ public class JpaCouponProvider implements CouponProvider {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Coupon> findAll() {
         return couponJpaRepository.findAll().stream()
                 .map(this::jpaToDomain)
@@ -39,6 +40,7 @@ public class JpaCouponProvider implements CouponProvider {
     }
 
     @Override
+    @Transactional
     public void registerCouponApplication(String couponCode) {
         // getReferenceById returns a proxy without a SELECT — correct here
         // because we only need the FK reference, not the full entity data
@@ -47,12 +49,14 @@ public class JpaCouponProvider implements CouponProvider {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Coupon> findById(String couponCode) {
         var found = couponJpaRepository.findById(couponCode);
         return found.map(this::jpaToDomain);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<CouponApplications> getCouponApplications(String couponCode) {
         var found = couponJpaRepository.findById(couponCode);
         return found.map(couponJpaEntity -> new CouponApplications(
